@@ -87,19 +87,22 @@ fun HomeContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Text(text = stringResource(id = R.string.enter_item))
+                OnBackgroundTitleText(
+                    text = stringResource(id = R.string.enter_item)
+                )
 
                 TextField(
                     value = inputField.name,
                     onValueChange = { onInputValueChange(it) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text
+                    )
                 )
 
-                Button(
-                    modifier = Modifier.padding(top = 16.dp),
-                    onClick = { onButtonClick() }
+                PrimaryTextButton(
+                    text = stringResource(id = R.string.button_click)
                 ) {
-                    Text(text = stringResource(id = R.string.button_click))
+                    onButtonClick()
                 }
             }
         }
@@ -111,11 +114,43 @@ fun HomeContent(
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = item.name)
+                OnBackgroundItemText(text = item.name)
             }
         }
     }
+
 }
+@Composable
+fun OnBackgroundTitleText(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.headlineSmall,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+}
+
+@Composable
+fun OnBackgroundItemText(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+}
+
+@Composable
+fun PrimaryTextButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.padding(top = 16.dp)
+    ) {
+        Text(text)
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
