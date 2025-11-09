@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,23 +18,16 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import com.example.lab_week_09.ui.theme.LAB_WEEK_09Theme
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavHostController
-
 import androidx.navigation.navArgument
+import androidx.compose.ui.graphics.Color
 
-// --------------------------------------------------------
-// DATA MODEL
-// --------------------------------------------------------
+
 data class Student(
     var name: String
 )
 
-// --------------------------------------------------------
-// MAIN ACTIVITY
-// --------------------------------------------------------
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,9 +45,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// --------------------------------------------------------
-// APP ROOT + NAVIGATION HOST
-// --------------------------------------------------------
+
 @Composable
 fun App(navController: NavHostController) {
 
@@ -66,24 +56,23 @@ fun App(navController: NavHostController) {
 
         composable("home") {
             Home { listAsString ->
-                navController.navigate("resultContent/?listData=$listAsString")
+                navController.navigate("resultContent?listData=$listAsString")
             }
         }
 
         composable(
-            "resultContent/?listData={listData}",
+            "resultContent?listData={listData}",
             arguments = listOf(navArgument("listData") {
+                defaultValue = ""
                 type = NavType.StringType
             })
-        ) {
-            ResultContent(it.arguments?.getString("listData").orEmpty())
+        ) { entry ->
+            ResultContent(entry.arguments?.getString("listData").orEmpty())
         }
     }
 }
 
-// --------------------------------------------------------
-// HOME (PARENT COMPOSABLE)
-// --------------------------------------------------------
+
 @Composable
 fun Home(
     navigateFromHomeToResult: (String) -> Unit
@@ -100,26 +89,22 @@ fun Home(
     var inputField by remember { mutableStateOf(Student("")) }
 
     HomeContent(
-        listData = listData,
-        inputField = inputField,
-        onInputValueChange = { input ->
-            inputField = inputField.copy(name = input)
-        },
-        onButtonClick = {
+        listData,
+        inputField,
+        { input -> inputField = inputField.copy(name = input) },
+        {
             if (inputField.name.isNotBlank()) {
                 listData.add(inputField)
                 inputField = Student("")
             }
+
         },
-        navigateFromHomeToResult = {
-            navigateFromHomeToResult(listData.toList().toString())
-        }
+        { navigateFromHomeToResult(listData.toList().toString()) }
     )
+
 }
 
-// --------------------------------------------------------
-// HOME CONTENT (CHILD COMPOSABLE)
-// --------------------------------------------------------
+
 @Composable
 fun HomeContent(
     listData: SnapshotStateList<Student>,
@@ -149,9 +134,13 @@ fun HomeContent(
                 )
 
                 Row {
-                    PrimaryTextButton(text = "Add") {
+                    PrimaryTextButton(
+                        text = "Add",
+                        enabled = inputField.name.isNotBlank()
+                    ) {
                         onButtonClick()
                     }
+
                     PrimaryTextButton(text = "Finish") {
                         navigateFromHomeToResult()
                     }
@@ -172,9 +161,7 @@ fun HomeContent(
     }
 }
 
-// --------------------------------------------------------
-// RESULT CONTENT
-// --------------------------------------------------------
+
 @Composable
 fun ResultContent(listData: String) {
     Column(
@@ -187,9 +174,7 @@ fun ResultContent(listData: String) {
     }
 }
 
-// --------------------------------------------------------
-// CUSTOM UI COMPONENTS
-// --------------------------------------------------------
+
 @Composable
 fun OnBackgroundTitleText(text: String) {
     Text(
@@ -209,20 +194,22 @@ fun OnBackgroundItemText(text: String) {
 }
 
 @Composable
-fun PrimaryTextButton(
-    text: String,
-    onClick: () -> Unit
-) {
+fun PrimaryTextButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.padding(8.dp)
+        enabled = enabled,
+        modifier = Modifier.padding(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.DarkGray,
+            contentColor = Color.White
+        )
     ) {
-        Text(text)
+        Text(text = text, style = MaterialTheme.typography.labelMedium)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewHome() {
-    Home {}
+    Home { _ -> }
 }
